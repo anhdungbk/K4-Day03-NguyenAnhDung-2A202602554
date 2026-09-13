@@ -1,8 +1,8 @@
 # 📊 BÁO CÁO THU HOẠCH NGHIỆM THU BÀI LAB 3 (BƯỚC 3 — SUBMISSION ARTIFACT)
 
-> **Họ và Tên Học viên:** [Điền Họ và Tên]  
-> **Mã Sinh Viên / Mã Học viên:** [Điền MSSV]  
-> **Chủ đề Lựa chọn:** [Điền tên chủ đề đã chọn từ docs/DANH_SACH_DE_TAI.md hoặc Đề tài Mở]  
+> **Họ và Tên Học viên:** Nguyễn Anh Dũng
+> **Mã Sinh Viên / Mã Học viên:** 2A202602554
+> **Chủ đề Lựa chọn:** Trợ lý Học vụ & Tra cứu Lịch thi cho sinh viên VinUni
 
 ---
 
@@ -10,10 +10,10 @@
 
 | Tiêu chí Đánh giá | Mức độ (1 - 5) | Giải trình chi tiết lý do chọn điểm |
 | :--- | :---: | :--- |
-| **1. Multi-step Reasoning** | / 5 | Bài toán có yêu cầu chia nhỏ nhiều bước suy luận nối tiếp nhau không? |
-| **2. Tool Interaction** | / 5 | Hệ thống có cần kết nối với MCP Server / Cơ sở dữ liệu bên ngoài không? |
-| **3. Dynamic Decision** | / 5 | Bước tiếp theo có phụ thuộc vào kết quả quan sát bước trước không? |
-| **4. Long Horizon Goal** | / 5 | Hệ thống có phải giữ mục tiêu xuyên suốt qua nhiều lượt xử lý không? |
+| **1. Multi-step Reasoning** | 5 / 5 | Trợ lý cần hiểu câu hỏi của sinh viên, xác định học phần/lớp/kỳ học, đối chiếu lịch thi, kiểm tra điều kiện hoặc thông tin liên quan, rồi tổng hợp câu trả lời rõ ràng. Đây là chuỗi suy luận nhiều bước liên kết với nhau. |
+| **2. Tool Interaction** | 5 / 5 | Hệ thống cần kết nối MCP Server hoặc cơ sở dữ liệu học vụ để truy xuất lịch thi, thông tin môn học, phòng thi, ca thi và các thông báo cập nhật từ nhà trường. |
+| **3. Dynamic Decision** | 5 / 5 | Bước xử lý tiếp theo phụ thuộc vào dữ liệu tra cứu. Ví dụ, nếu sinh viên chưa cung cấp mã môn học hoặc có nhiều lớp học phần trùng tên, Agent phải hỏi lại hoặc đưa ra các lựa chọn phù hợp. |
+| **4. Long Horizon Goal** | 4 / 5 | Agent cần duy trì ngữ cảnh trong suốt hội thoại, chẳng hạn thông tin sinh viên, học kỳ, môn học đang tra cứu và các câu hỏi tiếp theo. Tuy nhiên, phạm vi tác vụ chủ yếu vẫn tập trung vào hỗ trợ học vụ và lịch thi nên chưa cần quản lý mục tiêu dài hạn quá phức tạp. |
 | **TỔNG ĐIỂM AGENTIC FIT** | **/ 20** | *Nếu tổng điểm > 12/20: Bài toán rất phù hợp triển khai Agentic System.* |
 
 ---
