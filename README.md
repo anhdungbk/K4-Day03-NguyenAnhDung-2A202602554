@@ -2,8 +2,9 @@
 
 > **Mã bài học:** `DAY03-REACT-AGENT`  
 > **Hình thức thực hiện:** **CÁ NHÂN** *(Mỗi học viên tự làm và tự nộp 1 bài cá nhân)*  
-> **Quy chuẩn nộp bài:** Học viên Fork Repo này về GitHub cá nhân và đổi tên theo đúng cú pháp:  
-> 📌 **`K4-DAY03-HoVaTen-MSSV`** *(Ví dụ: `K4-DAY03-NguyenVanA-SV2026001`)*  
+> **Repository bài làm:** `K4-Day03-NguyenAnhDung-2A202602554`
+> **Học viên:** Nguyễn Anh Dũng (`2A202602554`)
+> **Chủ đề:** Trợ lý Học vụ & Tra cứu Lịch thi cho sinh viên VinUni
 
 ---
 
@@ -15,8 +16,8 @@ Thực hiện 3 bước lệnh Terminal thiết thực ngay khi clone repo về 
 
 ### Bước 1: Clone Repo & Tạo môi trường ảo
 ```bash
-git clone https://github.com/<tai_khoan_cua_ban>/K4-DAY03-HoVaTen-MSSV.git
-cd K4-DAY03-HoVaTen-MSSV
+git clone https://github.com/anhdungbk/K4-Day03-NguyenAnhDung-2A202602554.git
+cd K4-Day03-NguyenAnhDung-2A202602554
 
 python -m venv .venv
 # Trên Windows PowerShell:
@@ -28,28 +29,32 @@ source .venv/bin/activate
 ### Bước 2: Cài đặt thư viện & Tạo file cấu hình môi trường
 ```bash
 pip install -r requirements.txt
-# Trên Windows CMD/PowerShell:
-copy .env.example .env
-copy config\test_cases.example.json config\test_cases.json
-# Trên macOS / Linux:
-cp .env.example .env
-cp config/test_cases.example.json config/test_cases.json
 ```
 
-### Bước 3: Chạy thử Baseline kiểm tra môi trường
+`config/test_cases.json` đã có đủ 5 ca kiểm thử trong repository; **không copy file mẫu đè lên file này**. Nếu chưa có `.env`, tạo từ `.env.example` rồi điền API key của bạn. Không commit `.env` vì file này chứa thông tin bí mật.
+
+```bash
+# macOS / Linux (chỉ chạy nếu chưa có .env)
+cp .env.example .env
+```
+
+Trên Windows, dùng `Copy-Item .env.example .env` (PowerShell) hoặc `copy .env.example .env` (CMD).
+
+### Bước 3: Chạy bộ kiểm thử
 ```bash
 python src/app.py --all
 ```
 
-**Kỳ vọng Output màn hình:**
+**Kỳ vọng Output màn hình khi chạy đủ bộ test:**
 ```text
-✅ [MOCK OFFLINE MODE PASS]: Môi trường đã sẵn sàng! 
-📊 [KẾT QUẢ TEST SUITE]: 2 Đã chạy (TC01, TC02 mẫu) | 3 Đang chờ viết câu hỏi (TODO)
+📊 [KẾT QUẢ TEST SUITE]: Đã thực thi 5/5 Test Cases | 0 Test Cases đang chờ điền câu hỏi (TODO)
 ```
+
+Lệnh trên chỉ cho biết 5 ca đã được **thực thi**; để nghiệm thu bằng LLM thật, kiểm tra màn hình không có cảnh báo fallback sang Mock và đối chiếu từng kết quả với `expected_behavior` trong `config/test_cases.json`.
 
 > 🔑 **QUY ĐỊNH BẮT BUỘC VỀ API KEY VÀ NỘP BÀI (SUBMISSION REQUIREMENT):**  
 > 
-> 1. **Giai đoạn gõ code & debug (Miễn phí 0đ):** Hệ thống mặc định chạy `MockOfflineProvider` giúp bạn thực hành gõ code, kiểm thử logic ban đầu hoàn toàn miễn phí, không tốn token, không lo nghẽn mạng.  
+> 1. **Giai đoạn gõ code & debug (Miễn phí 0đ):** Đặt `LLM_PROVIDER=mock` trong `.env` để chạy `MockOfflineProvider` mà không gọi API.
 > 2. **Giai đoạn NỘP BÀI CHÍNH THỨC (Bắt buộc dùng LLM thật):** Khi chạy nghiệm thu để lấy dữ liệu dán vào báo cáo [`docs/trace_eval.md`](docs/trace_eval.md) nộp bài, **học viên BẮT BUỘC phải mở file `.env` điền `GEMINI_API_KEY` (hoặc `OPENAI_API_KEY`)** để Agent giao tiếp với mô hình LLM thật.  
 > 
 > ⚠️ *Lưu ý:* Bài nộp chỉ chạy trên Mock Provider mà không kết nối LLM API thật sẽ bị trừ điểm phần nghiệm thu thực tế (Tiêu chí 2 & Tiêu chí 3 trong Rubric).
@@ -66,7 +71,7 @@ Thay vì chỉ sinh văn bản hội thoại đơn thuần như Chatbot cơ bả
 3. **Trích xuất bằng chứng (Trace Log):** Ghi lại file vết `docs/trace_waterfall.json` chứng minh chuỗi suy luận từng bước của Agent.
 
 > 🌐 **GIAO THỨC MODEL CONTEXT PROTOCOL (MCP):**  
-> Mã nguồn [`src/mcp_server.py`](src/mcp_server.py) mô phỏng kiến trúc MCP Server chuẩn (giao tiếp Client-Server độc lập qua giao thức JSON-RPC 2.0). Agent Core ([`src/app.py`](src/app.py)) đóng vai trò MCP Client gửi yêu cầu thực thi Tool tới MCP Server.
+> Mã nguồn [`src/mcp_server.py`](src/mcp_server.py) **mô phỏng** lớp MCP Server và cấu trúc phản hồi có trường `jsonrpc: "2.0"`. Agent Core ([`src/app.py`](src/app.py)) gọi lớp này trực tiếp trong cùng tiến trình; dự án chưa triển khai một MCP Server độc lập qua mạng/stdio.
 
 ---
 
@@ -94,13 +99,13 @@ Học viên làm bài lần lượt theo đúng luồng 3 bước tinh giản d�
 ## 📂 5. CẤU TRÚC THƯ MỤC DỰ ÁN
 
 ```text
-📁 K4-Day03-Lab-Chatbot-vs-ReAct-Agent-MCP/
+📁 K4-Day03-NguyenAnhDung-2A202602554/
 ├── 📄 README.md                 <-- ⚡ [BƯỚC 1] Quickstart setup & Cảnh báo quy định API Key
 ├── 📄 .env.example              <-- 🔑 File cấu hình API Key (Gemini, OpenAI, Anthropic, Mock)
 ├── 📄 requirements.txt          <-- 📦 Thư viện Python tương thích đa nền tảng
 │
 ├── 📁 config/
-│   ├── 📄 test_cases.example.json <-- 🟢 Mẫu Bộ 5 Test Cases (Copy thành test_cases.json)
+│   ├── 📄 test_cases.example.json <-- 🟢 Mẫu Bộ 5 Test Cases tham khảo
 │   └── 📄 test_cases.json         <-- 🟢 Bộ 5 Test Cases tùy biến theo đề tài của bạn
 │
 ├── 📁 src/                      <-- 💻 MÃ NGUỒN PYTHON
@@ -110,12 +115,15 @@ Học viên làm bài lần lượt theo đúng luồng 3 bước tinh giản d�
 │   ├── 📄 providers.py          <-- 🔌 Multi-Provider LLM Adapter (Gemini/OpenAI/Mock)
 │   ├── 📄 app.py                <-- 🚀 MCP Client & Core Agent App ghép nối ReAct Loop & Trace Log
 │   └── 📁 ai_levels/            <-- 📚 [REFERENCE ONLY] Code mẫu kiến trúc tham khảo (Không sửa/debug)
-│       └── 📄 README.md         <-- ⚠️ Chú thích mã nguồn tham khảo
+│       ├── 📄 README.md         <-- ⚠️ Chú thích mã nguồn tham khảo
+│       └── 📄 level3_native_mcp_agent.py <-- Ví dụ Agent cấp 3
 │
 └── 📁 docs/                     <-- 📚 TÀI LIỆU HƯỚNG DẪN CHUẨN VLEARN CODELAB
     ├── 📄 DANH_SACH_DE_TAI.md    <-- 💡 Gợi ý chủ đề theo Lĩnh vực & Đề tài Mở
     ├── 📄 CODELAB.md            <-- 🎓 [BƯỚC 2 - TRỌNG TÂM] Hướng dẫn Codelab thực hành theo checklist
-    └── 📄 trace_eval.md          <-- 📊 [BƯỚC 3] File Báo cáo Nộp bài duy nhất (Submission Report Artifact)
+    ├── 📄 SO_TAY_THUC_HANH.md   <-- 📖 Sổ tay thực hành
+    ├── 📄 trace_eval.md         <-- 📊 [BƯỚC 3] Báo cáo nộp bài
+    └── 📄 trace_waterfall.json  <-- 📈 Trace của bộ kiểm thử
 ```
 
 ---
