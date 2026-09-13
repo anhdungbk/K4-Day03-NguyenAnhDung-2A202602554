@@ -6,6 +6,7 @@ Hỗ trợ Native Tool Calling và chuyển đổi linh hoạt qua biến môi t
 import os
 import sys
 import json
+import re
 from typing import Dict, Any, List
 from dotenv import load_dotenv
 
@@ -36,21 +37,27 @@ class MockOfflineProvider(BaseLLMProvider):
 
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
         prompt_lower = prompt.lower()
+        student_match = re.search(r"\bSV\d{7}\b", prompt, re.IGNORECASE)
+        student_id = student_match.group(0).upper() if student_match else None
+        datetime_match = re.search(r"\b\d{2}:\d{2}\s+(?:ngày\s+)?\d{2}/\d{2}/\d{4}\b", prompt, re.IGNORECASE)
+        datetime_str = re.sub(r"\s+ngày\s+", " ", datetime_match.group(0), flags=re.IGNORECASE) if datetime_match else None
         
         # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
+        if student_id and "đặt lịch" in prompt_lower and "tra cứu" not in prompt_lower:
+            advisor_match = re.search(r"(?:PGS\.TS|TS\.)\s+[^,]+?(?=\s+vào\s+lúc|[.!?]|$)", prompt)
+            advisor_name = advisor_match.group(0).strip() if advisor_match else "PGS.TS Nguyễn Văn A"
             return {
                 "type": "tool_call",
                 "tool_name": "schedule_appointment",
-                "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
-                "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
+                "arguments": {"student_id": student_id, "datetime_str": datetime_str or "14:00 15/09/2026", "advisor_name": advisor_name},
+                "thought": f"Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên {student_id}. Tôi sẽ gọi tool schedule_appointment."
             }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
+        elif student_id and ("tra cứu" in prompt_lower or "học vụ" in prompt_lower):
             return {
                 "type": "tool_call",
                 "tool_name": "academic_query",
-                "arguments": {"student_id": "SV2026001"},
-                "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
+                "arguments": {"student_id": student_id},
+                "thought": f"Người dùng muốn tra cứu thông tin học vụ của sinh viên {student_id}. Tôi sẽ gọi tool academic_query."
             }
         else:
             return {
@@ -64,7 +71,7 @@ class GeminiProvider(BaseLLMProvider):
     """Google Gemini Provider (Native Tool Calling với Google GenAI SDK)"""
     def __init__(self, api_key: str = None, model: str = None):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        self.model_name = model or os.getenv("LLM_MODEL") or "gemini-2.5-flash"
+        self.model_name = model or os.getenv("LLM_MODEL") or "gemini-3.6-flash"
 
     def generate(self, prompt: str, system_prompt: str = "") -> str:
         if not self.api_key or self.api_key == "your_gemini_api_key_here":

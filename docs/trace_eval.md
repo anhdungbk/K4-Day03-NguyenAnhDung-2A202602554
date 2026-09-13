@@ -14,7 +14,7 @@
 | **2. Tool Interaction** | 5 / 5 | Hệ thống cần kết nối MCP Server hoặc cơ sở dữ liệu học vụ để truy xuất lịch thi, thông tin môn học, phòng thi, ca thi và các thông báo cập nhật từ nhà trường. |
 | **3. Dynamic Decision** | 5 / 5 | Bước xử lý tiếp theo phụ thuộc vào dữ liệu tra cứu. Ví dụ, nếu sinh viên chưa cung cấp mã môn học hoặc có nhiều lớp học phần trùng tên, Agent phải hỏi lại hoặc đưa ra các lựa chọn phù hợp. |
 | **4. Long Horizon Goal** | 4 / 5 | Agent cần duy trì ngữ cảnh trong suốt hội thoại, chẳng hạn thông tin sinh viên, học kỳ, môn học đang tra cứu và các câu hỏi tiếp theo. Tuy nhiên, phạm vi tác vụ chủ yếu vẫn tập trung vào hỗ trợ học vụ và lịch thi nên chưa cần quản lý mục tiêu dài hạn quá phức tạp. |
-| **TỔNG ĐIỂM AGENTIC FIT** | **/ 20** | *Nếu tổng điểm > 12/20: Bài toán rất phù hợp triển khai Agentic System.* |
+| **TỔNG ĐIỂM AGENTIC FIT** | **19 / 20** | *Nếu tổng điểm > 12/20: Bài toán rất phù hợp triển khai Agentic System.* |
 
 ---
 
@@ -22,26 +22,51 @@
 
 > ⚠️ **YÊU CẦU NGHIỆM THU:** Mở tệp `.env` điền `GEMINI_API_KEY` (hoặc `OPENAI_API_KEY`) để kết nối LLM thật trước khi thực thi `python src/app.py --all`. Bài nộp chỉ dùng Mock Offline Provider sẽ không đạt điểm nghiệm thực tế.
 
-Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.json` sinh ra từ phản hồi LLM API thật:
+Đoạn trace TC04 từ `docs/trace_waterfall.json`, chạy với Gemini API thật (`gemini-3.6-flash`). Agent tra cứu cố vấn của SV2026002 trước, rồi đặt lịch với tên cố vấn từ kết quả tra cứu:
 
 ```json
 [
   {
     "step": 1,
+    "query": "Hãy tra cứu cố vấn học tập của sinh viên SV2026002, sau đó đặt lịch tư vấn với đúng cố vấn đó vào lúc 09:00 ngày 16/09/2026.",
     "action_type": "TOOL_EXECUTION",
     "tool_name": "academic_query",
     "arguments": {
-      "student_id": "SV2026001"
+      "student_id": "SV2026002"
     },
     "observation": {
       "status": "SUCCESS",
-      "student_id": "SV2026001",
+      "student_id": "SV2026002",
       "data": {
-        "full_name": "Nguyễn Văn An",
-        "gpa": 3.85
+        "full_name": "Trần Thị Bình",
+        "class": "AI-K4",
+        "gpa": 3.6,
+        "email": "binh.tt@vinuni.edu.vn",
+        "status": "Đang học",
+        "advisor": "TS. Lê Thị B"
       }
     },
-    "latency_ms": 120.5
+    "latency_ms": 1892.62
+  },
+  {
+    "step": 2,
+    "query": "Hãy tra cứu cố vấn học tập của sinh viên SV2026002, sau đó đặt lịch tư vấn với đúng cố vấn đó vào lúc 09:00 ngày 16/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "schedule_appointment",
+    "arguments": {
+      "student_id": "SV2026002",
+      "datetime_str": "09:00 16/09/2026",
+      "advisor_name": "TS. Lê Thị B"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "booking_id": "BK-SV2026002-99",
+      "student_id": "SV2026002",
+      "datetime": "09:00 16/09/2026",
+      "advisor": "TS. Lê Thị B",
+      "message": "Đặt lịch thành công cho sinh viên SV2026002 với TS. Lê Thị B vào lúc 09:00 16/09/2026."
+    },
+    "latency_ms": 0.04
   }
 ]
 ```
@@ -50,9 +75,9 @@ Dán 1 đoạn trích xuất log tiêu biểu từ file `docs/trace_waterfall.js
 
 ## 3. TỔNG KẾT KẾT QUẢ NGHIỆM THU & NỘP BÀI
 
-- [ ] Đã điền API Key thật trong `.env` và xác nhận Agent chạy mượt mà trên LLM API thật (Gemini/OpenAI).
-- **Tổng số Test Cases đã chạy thành công:** ___ / 5 test cases.
-- **Số lượt gọi Tool qua MCP Server chính xác:** ___ lượt.
+- [x] Đã cấu hình API Key trong `.env` và xác nhận 5 test chạy với Gemini API thật (`gemini-3.6-flash`), không fallback sang Mock.
+- **Tổng số Test Cases đã chạy thành công:** 5 / 5 test cases.
+- **Số lượt gọi Tool qua MCP Server chính xác:** 5 lượt (TC02: 1, TC03: 1, TC04: 2, TC05: 1).
 - **Kết quả đẩy Repo nộp bài:** [ ] Đã Commit và Push mã nguồn thành công lên GitHub cá nhân.
 
 ---

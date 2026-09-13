@@ -26,16 +26,8 @@ TOOLS_SCHEMA = [
             "required": ["student_id"]
         }
     },
-    
-    # --------------------------------------------------------------------------
-    # TODO 1.2: HỌC VIÊN HOÀN THIỆN TOOL SCHEMA CHO 'schedule_appointment'
-    # 🎯 YÊU CẦU THIẾT KẾ SCHEMA (JSON SCHEMA STANDARD):
-    # 1. Tool dùng để đặt lịch hẹn tư vấn học vụ với Cố vấn học tập VinUni.
-    # 2. Thiết kế các tham số (properties) để LLM trích xuất:
-    #    - student_id (string): Mã sinh viên cần đặt lịch (ví dụ: 'SV2026001')
-    #    - datetime_str (string): Thời gian hẹn (ví dụ: '14:00 15/09/2026')
-    #    - advisor_name (string): Tên cố vấn học tập
-    # 3. Khai báo danh sách các trường bắt buộc (required).
+
+    # Tool 2: Đặt lịch hẹn với cố vấn học tập
     {
         "name": "schedule_appointment",
         "description": "Đặt lịch hẹn tư vấn học vụ với Cố vấn học tập VinUni.",
@@ -87,20 +79,25 @@ MOCK_DATABASE = {
 def execute_academic_query(student_id: str) -> str:
     """Thực thi tra cứu học vụ theo mã sinh viên"""
     student = MOCK_DATABASE.get(student_id.strip().upper())
+
     if student:
         return json.dumps({
             "status": "SUCCESS",
             "student_id": student_id,
             "data": student
         }, ensure_ascii=False)
-    else:
-        return json.dumps({
-            "status": "NOT_FOUND",
-            "message": f"Không tìm thấy dữ liệu sinh viên có mã '{student_id}'"
-        }, ensure_ascii=False)
+
+    return json.dumps({
+        "status": "NOT_FOUND",
+        "message": f"Không tìm thấy dữ liệu sinh viên có mã '{student_id}'"
+    }, ensure_ascii=False)
 
 
-def execute_schedule_appointment(student_id: str, datetime_str: str, advisor_name: str = "PGS.TS Nguyễn Văn A") -> str:
+def execute_schedule_appointment(
+    student_id: str,
+    datetime_str: str,
+    advisor_name: str = "PGS.TS Nguyễn Văn A"
+) -> str:
     """Thực thi đặt lịch hẹn tư vấn học vụ"""
     return json.dumps({
         "status": "SUCCESS",
@@ -108,7 +105,10 @@ def execute_schedule_appointment(student_id: str, datetime_str: str, advisor_nam
         "student_id": student_id,
         "datetime": datetime_str,
         "advisor": advisor_name,
-        "message": f"Đặt lịch thành công cho sinh viên {student_id} với {advisor_name} vào lúc {datetime_str}."
+        "message": (
+            f"Đặt lịch thành công cho sinh viên {student_id} "
+            f"với {advisor_name} vào lúc {datetime_str}."
+        )
     }, ensure_ascii=False)
 
 
@@ -118,11 +118,19 @@ TOOL_ROUTER = {
     "schedule_appointment": execute_schedule_appointment
 }
 
+
 def dispatch_tool_call(tool_name: str, arguments: Dict[str, Any]) -> str:
     """Hàm trung chuyển thực thi tool"""
     if tool_name in TOOL_ROUTER:
         try:
             return TOOL_ROUTER[tool_name](**arguments)
         except Exception as e:
-            return json.dumps({"status": "EXECUTION_ERROR", "error": str(e)}, ensure_ascii=False)
-    return json.dumps({"status": "UNKNOWN_TOOL", "error": f"Tool '{tool_name}' không tồn tại!"}, ensure_ascii=False)
+            return json.dumps({
+                "status": "EXECUTION_ERROR",
+                "error": str(e)
+            }, ensure_ascii=False)
+
+    return json.dumps({
+        "status": "UNKNOWN_TOOL",
+        "error": f"Tool '{tool_name}' không tồn tại!"
+    }, ensure_ascii=False)

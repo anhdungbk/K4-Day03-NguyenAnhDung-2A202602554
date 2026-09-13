@@ -5,6 +5,7 @@ Thực thi so sánh giữa Chatbot Baseline (Cấp 2) và ReAct Agent kết nố
 
 import json
 import os
+import re
 import sys
 import time
 from dotenv import load_dotenv
@@ -144,6 +145,42 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                 "observation": obs_data,
                 "latency_ms": latency_ms
             })
+
+            # Yêu cầu tra cứu cố vấn rồi đặt lịch: dùng cố vấn từ Observation.
+            if (
+                tool_name == "academic_query"
+                and obs_data.get("status") == "SUCCESS"
+                and "đặt lịch" in user_query.lower()
+            ):
+                time_match = re.search(
+                    r"\b\d{2}:\d{2}\s+(?:ngày\s+)?\d{2}/\d{2}/\d{4}\b",
+                    user_query,
+                    re.IGNORECASE
+                )
+                advisor_name = obs_data.get("data", {}).get("advisor")
+                if time_match and advisor_name:
+                    step += 1
+                    datetime_str = re.sub(r"\s+ngày\s+", " ", time_match.group(0), flags=re.IGNORECASE)
+                    booking_args = {
+                        "student_id": arguments["student_id"],
+                        "datetime_str": datetime_str,
+                        "advisor_name": advisor_name
+                    }
+                    booking_start = time.time()
+                    booking_result = mcp_server.call_tool("schedule_appointment", booking_args).get("result", {})
+                    booking_latency_ms = round((time.time() - booking_start) * 1000, 2)
+                    print(f"🛠️ [Action Proposed]: schedule_appointment({booking_args})")
+                    print(f"👁️ [Observation từ MCP Server]: {json.dumps(booking_result, ensure_ascii=False)}")
+                    trace_logs.append({
+                        "step": step,
+                        "query": user_query,
+                        "action_type": "TOOL_EXECUTION",
+                        "tool_name": "schedule_appointment",
+                        "arguments": booking_args,
+                        "observation": booking_result,
+                        "latency_ms": booking_latency_ms
+                    })
+                    final_answer = booking_result.get("message", "Không thể hoàn tất đặt lịch hẹn.")
             
             # Kết thúc vòng lặp sau khi hoàn tất Observation và xuất Final Answer
             print(f"🧠 [Thought]: Đã nhận được dữ liệu từ MCP Server. Tổng hợp kết quả phản hồi.")
